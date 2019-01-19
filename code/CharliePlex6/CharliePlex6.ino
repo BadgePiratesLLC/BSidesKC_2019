@@ -29,7 +29,7 @@ LED    Cathode      Anode
 
 const int LED_1 = 13;     //LED row 1
 const int LED_2 = 12;     //LED row 2    
-const int LED_3 = 14;     //LED row 3
+const int LED_3 = 10;     //LED row 3
 
 void setup() 
 {
