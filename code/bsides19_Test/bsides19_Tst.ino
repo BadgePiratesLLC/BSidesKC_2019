@@ -15,7 +15,7 @@ void setup() {
   Serial.println();
 
 
-  WiFi.softAP(ssid, password);             // Start the access point
+  //WiFi.softAP(ssid, password);             // Start the access point
   Serial.print("Access Point \"");
   Serial.print(ssid);
   Serial.println("\" setup but not started");
