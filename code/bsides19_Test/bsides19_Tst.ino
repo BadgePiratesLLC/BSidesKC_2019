@@ -6,15 +6,20 @@ const int LED_3 = 10;     //LED row 3
 const char *ssid = "BadgePiratesAP_01"; // The name of the Wi-Fi network that will be created
 const char *password = "thereisnospoon";   // The password required to connect to it, leave blank for an open network
 const int dTime = 50;
-
+const int wifiFlag = 1;
 
 void setup() {
   Serial.begin(74880);
   delay(10);
-
   Serial.println();
 
-
+if (WifiFlag == 1) {
+  WiFi.mode(WIFI_OFF);
+  WiFi.forceSleepBegin();
+  Serial.print(Wifi Disabled \"");
+}
+  
+if (WifiFlag ==0){
   //WiFi.softAP(ssid, password);             // Start the access point
   Serial.print("Access Point \"");
   Serial.print(ssid);
@@ -27,6 +32,7 @@ void setup() {
   Serial.println(WiFi.macAddress());  // Send the MAC address of the ESP8266 to the Monitor
   Serial.println('\n');
   }
+}
 
 void loop()
 {
