@@ -15,13 +15,13 @@ void setup() {
   delay(10);
   Serial.println();
 
-if (WifiFlag == 1) {
-  WiFi.mode(WIFI_OFF);
-  WiFi.forceSleepBegin();
-  Serial.print("Wifi Disabled \"");
-}
+  if (WifiFlag == 1) {
+    WiFi.mode(WIFI_OFF);
+    WiFi.forceSleepBegin();
+    Serial.print("Wifi Disabled \"");
+  }
 
-if (WifiFlag ==0){
+  if (WifiFlag ==0){
     //WiFi.softAP(ssid, password);             // Start the access point
     Serial.print("Access Point \"");
     Serial.print(ssid);
@@ -38,8 +38,7 @@ if (WifiFlag ==0){
   }
 }
 
-void loop()
-{
+void loop() {
 
   if(gameEnabled == 1) {
 
