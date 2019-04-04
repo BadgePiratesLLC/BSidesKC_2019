@@ -1,8 +1,23 @@
 
 #include <ESP8266WiFi.h>        // Include the Wi-Fi library
+#include "Chaplex.h"
 const int LED_1 = 13;     //LED row 1
 const int LED_2 = 12;     //LED row 2
 const int LED_3 = 10;     //LED row 3
+
+//chaplex stuff
+byte controlPins[] = {13, 12, 10};
+#define numControlPins sizeof(controlPins) / sizeof(*controlPins)
+Chaplex myCharlie(controlPins, numControlPins); //control instance
+charlieLed myLeds[6] = {
+  { 2 , 1 },    // 1 controlled leds in sorted order (when looking at front, from left -> to -> right)
+  { 1 , 0 },    // 2 every element is one led with
+  { 1 , 2 },    // 3 {anode-pin,cathode-pin}
+  { 0 , 1 },    // 4 "pin" means here - index in controlPins
+  { 2 , 0 },    // 5 array defined above
+  { 0 , 2 }     // 6
+};
+
 const char *ssid = "BadgePiratesAP_01"; // The name of the Wi-Fi network that will be created
 const char *password = "thereisnospoon";   // The password required to connect to it, leave blank for an open network
 const int dTime = 50;
@@ -10,10 +25,24 @@ const int WifiFlag = 0;
 int gameEnabled = 0;
 int WifiFlags[] = {0,0,0,0,0,0};
 
+long goneTime;
+#define NEWPATTERN 100        //100 ms for new LED pattern
+os_timer_t myTimer;
+bool tickOccured;
+bool reverseAnimation = false;
+
+void timerCallback(void *pArg) {
+  myCharlie.outRow();
+} // End of timerCallback
+
 void setup() {
   Serial.begin(74880);
   delay(10);
   Serial.println();
+  os_timer_setfn(&myTimer, timerCallback, NULL);
+  os_timer_arm(&myTimer, 5, true);
+  randomSeed(analogRead(0));
+  goneTime = millis();
 
 if (WifiFlag == 1) {
   WiFi.mode(WIFI_OFF);
@@ -38,174 +67,93 @@ if (WifiFlag ==0){
   }
 }
 
+
 void loop()
 {
+  // const unsigned long fiveMinutes = 5 * 60 * 1000UL;
+  const unsigned long fiveMinutes = 15 * 1000UL;  // 15 seconds to test, uncomment above code for 5 minutes
+  static unsigned long lastSampleTime = 0 - fiveMinutes;  // initialize such that a reading is due the first time through loop()
+  unsigned long now = millis();
+  if (now - lastSampleTime >= fiveMinutes)
+  {
+     Serial.print("Scanning:\t ");
+     lastSampleTime += fiveMinutes;
+     listNetworks();
+  }
+
+  // add code to do other stuff here
+  //single led
+  // myCharlie.ledWrite(lights[0], ON);
+  // myCharlie.outRow();
+
+  //flicker pattern
+  // if (millis()-goneTime >= NEWPATTERN) {
+  //   for (byte i=0; i<10; i++)
+  //     myCharlie.ledWrite(lights[i], (byte)random(0,2));
+  //   goneTime = millis();
+  // }
+  // myCharlie.outRow();
 
   if(gameEnabled == 1) {
 
     if(WifiFlags[0] == 1){
-      //turn on LED L1
-      pinMode(LED_1, INPUT);      //row 1
-      digitalWrite(LED_1, LOW);
-      pinMode(LED_2, OUTPUT);     //row 2
-      digitalWrite(LED_2, LOW);
-      pinMode(LED_3, OUTPUT);     //row 3
-      digitalWrite(LED_3, HIGH);
+      myCharlie.ledWrite(myLeds[0], ON);
+    } else {
+      myCharlie.ledWrite(myLeds[0], OFF);
     }
 
     if(WifiFlags[1] == 1){
-      //turn on LED L2
-      pinMode(LED_1, OUTPUT);     //row 1
-      digitalWrite(LED_1, LOW);
-      pinMode(LED_2, OUTPUT);     //row 2
-      digitalWrite(LED_2, HIGH);
-      pinMode(LED_3, INPUT);      //row 3
-      digitalWrite(LED_3, LOW);
+      myCharlie.ledWrite(myLeds[1], ON);
+    } else {
+      myCharlie.ledWrite(myLeds[1], OFF);
     }
+
     if(WifiFlags[2] == 1){
-      //turn on LED L3
-      pinMode(LED_1, INPUT);     //row 1
-      digitalWrite(LED_1, LOW);
-      pinMode(LED_2, OUTPUT);    //row 2
-      digitalWrite(LED_2, HIGH);
-      pinMode(LED_3, OUTPUT);    //row 3
-      digitalWrite(LED_3, LOW);
+      myCharlie.ledWrite(myLeds[2], ON);
+    } else {
+      myCharlie.ledWrite(myLeds[2], OFF);
     }
+
     if(WifiFlags[3] == 1){
-       //turn on LED L4
-      pinMode(LED_1, OUTPUT);     //row 1
-      digitalWrite(LED_1, HIGH);
-      pinMode(LED_2, OUTPUT);     //row 2
-      digitalWrite(LED_2, LOW);
-      pinMode(LED_3, INPUT);      //row 3
-      digitalWrite(LED_3, LOW);
+      myCharlie.ledWrite(myLeds[3], ON);
+    } else {
+      myCharlie.ledWrite(myLeds[3], OFF);
     }
+
     if(WifiFlags[4] == 1){
-      //turn on LED L5
-      pinMode(LED_1, OUTPUT);    //row 1
-      digitalWrite(LED_1, LOW);
-      pinMode(LED_2, INPUT);     //row 2
-      digitalWrite(LED_2, LOW);
-      pinMode(LED_3, OUTPUT);    //row3
-      digitalWrite(LED_3, HIGH);
+      myCharlie.ledWrite(myLeds[4], ON);
+    } else {
+      myCharlie.ledWrite(myLeds[4], OFF);
     }
+
     if(WifiFlags[5] == 1){
-      //turn on LED L6
-      pinMode(LED_1, OUTPUT);
-      digitalWrite(LED_1, HIGH);
-      pinMode(LED_2, INPUT);
-      digitalWrite(LED_2, LOW);
-      pinMode(LED_3, OUTPUT);
-      digitalWrite(LED_3, LOW);
+      myCharlie.ledWrite(myLeds[5], ON);
+    } else {
+      myCharlie.ledWrite(myLeds[5], OFF);
     }
   }
   else {
-    //turn on LED L1
-    pinMode(LED_1, INPUT);      //row 1
-    digitalWrite(LED_1, LOW);
-    pinMode(LED_2, OUTPUT);     //row 2
-    digitalWrite(LED_2, LOW);
-    pinMode(LED_3, OUTPUT);     //row 3
-    digitalWrite(LED_3, HIGH);
-    delay(dTime);
-
-      //turn on LED L2
-    pinMode(LED_1, OUTPUT);     //row 1
-    digitalWrite(LED_1, LOW);
-    pinMode(LED_2, OUTPUT);     //row 2
-    digitalWrite(LED_2, HIGH);
-    pinMode(LED_3, INPUT);      //row 3
-    digitalWrite(LED_3, LOW);
-
-    delay(dTime);
-
-    //turn on LED L3
-    pinMode(LED_1, INPUT);     //row 1
-    digitalWrite(LED_1, LOW);
-    pinMode(LED_2, OUTPUT);    //row 2
-    digitalWrite(LED_2, HIGH);
-    pinMode(LED_3, OUTPUT);    //row 3
-    digitalWrite(LED_3, LOW);
-
-    delay(dTime);
-
-     //turn on LED L4
-    pinMode(LED_1, OUTPUT);     //row 1
-    digitalWrite(LED_1, HIGH);
-    pinMode(LED_2, OUTPUT);     //row 2
-    digitalWrite(LED_2, LOW);
-    pinMode(LED_3, INPUT);      //row 3
-    digitalWrite(LED_3, LOW);
-
-    delay(dTime);
-
-    //turn on LED L5
-    pinMode(LED_1, OUTPUT);    //row 1
-    digitalWrite(LED_1, LOW);
-    pinMode(LED_2, INPUT);     //row 2
-    digitalWrite(LED_2, LOW);
-    pinMode(LED_3, OUTPUT);    //row3
-    digitalWrite(LED_3, HIGH);
-
-    delay(dTime);
-
-    //turn on LED L6
-    pinMode(LED_1, OUTPUT);
-    digitalWrite(LED_1, HIGH);
-    pinMode(LED_2, INPUT);
-    digitalWrite(LED_2, LOW);
-    pinMode(LED_3, OUTPUT);
-    digitalWrite(LED_3, LOW);
-
-    delay(dTime);
-
-      //turn on LED L5
-    pinMode(LED_1, OUTPUT);    //row 1
-    digitalWrite(LED_1, LOW);
-    pinMode(LED_2, INPUT);     //row 2
-    digitalWrite(LED_2, LOW);
-    pinMode(LED_3, OUTPUT);    //row3
-    digitalWrite(LED_3, HIGH);
-
-    delay(dTime);
-
-       //turn on LED L4
-    pinMode(LED_1, OUTPUT);     //row 1
-    digitalWrite(LED_1, HIGH);
-    pinMode(LED_2, OUTPUT);     //row 2
-    digitalWrite(LED_2, LOW);
-    pinMode(LED_3, INPUT);      //row 3
-    digitalWrite(LED_3, LOW);
-
-    delay(dTime);
-      //turn on LED L3
-    pinMode(LED_1, INPUT);     //row 1
-    digitalWrite(LED_1, LOW);
-    pinMode(LED_2, OUTPUT);    //row 2
-    digitalWrite(LED_2, HIGH);
-    pinMode(LED_3, OUTPUT);    //row 3
-    digitalWrite(LED_3, LOW);
-
-    delay(dTime);
-
-        //turn on LED L2
-    pinMode(LED_1, OUTPUT);     //row 1
-    digitalWrite(LED_1, LOW);
-    pinMode(LED_2, OUTPUT);     //row 2
-    digitalWrite(LED_2, HIGH);
-    pinMode(LED_3, INPUT);      //row 3
-    digitalWrite(LED_3, LOW);
-
-    delay(dTime);
-        //turn on LED L1
-    pinMode(LED_1, INPUT);      //row 1
-    digitalWrite(LED_1, LOW);
-    pinMode(LED_2, OUTPUT);     //row 2
-    digitalWrite(LED_2, LOW);
-    pinMode(LED_3, OUTPUT);     //row 3
-    digitalWrite(LED_3, HIGH);
+    if(!reverseAnimation) {
+      for (int i=0; i < 6; i++) {
+        for(int x=0; x < 6; x++){
+          if(x == i) { myCharlie.ledWrite(myLeds[x], ON); }
+          else {myCharlie.ledWrite(myLeds[x], OFF);}
+        }
+        delay(dTime);
+      }
+      reverseAnimation = true;
+    }
+    else {
+      for (int i=5; i > 0; i--) {
+        for(int x=5; x > 0; x--){
+          if(x == i) { myCharlie.ledWrite(myLeds[x], ON); }
+          else {myCharlie.ledWrite(myLeds[x], OFF);}
+        }
+        delay(dTime);
+      }
+      reverseAnimation = false;
+    }
   }
-
 }
 
 void listNetworks() {
