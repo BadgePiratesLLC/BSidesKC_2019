@@ -6,7 +6,7 @@ const int LED_3 = 10;     //LED row 3
 const char *ssid = "BadgePiratesAP_01"; // The name of the Wi-Fi network that will be created
 const char *password = "thereisnospoon";   // The password required to connect to it, leave blank for an open network
 const int dTime = 50;
-const int WifiFlag = 1;
+const int WifiFlag = 0;
 
 void setup() {
   Serial.begin(74880);
@@ -20,17 +20,19 @@ if (WifiFlag == 1) {
 }
   
 if (WifiFlag ==0){
-  //WiFi.softAP(ssid, password);             // Start the access point
-  Serial.print("Access Point \"");
-  Serial.print(ssid);
-  Serial.println("\" setup but not started");
+    //WiFi.softAP(ssid, password);             // Start the access point
+    Serial.print("Access Point \"");
+    Serial.print(ssid);
+    Serial.println("\" setup but not started");
 
-  Serial.print("IP address:\t");
-  Serial.println(WiFi.softAPIP());         // Send the IP address of the ESP8266 to the Monitor
+    Serial.print("IP address:\t");
+    Serial.println(WiFi.softAPIP());         // Send the IP address of the ESP8266 to the Monitor
 
-  Serial.print("MAC:\t ");
-  Serial.println(WiFi.macAddress());  // Send the MAC address of the ESP8266 to the Monitor
-  Serial.println('\n');
+    Serial.print("MAC:\t ");
+    Serial.println(WiFi.macAddress());  // Send the MAC address of the ESP8266 to the Monitor
+    Serial.println('\n');
+
+    listNetworks();
   }
 }
 
@@ -142,4 +144,50 @@ void loop()
   pinMode(LED_3, OUTPUT);     //row 3
   digitalWrite(LED_3, HIGH);
 
+}
+void listNetworks() {
+  // scan for nearby networks:
+  Serial.println("** Scan Networks **");
+  int numSsid = WiFi.scanNetworks();
+  if (numSsid == -1) {
+    Serial.println("Couldn't get a wifi connection");
+    while (true);
+  }
+
+  // print the list of networks seen:
+  Serial.print("number of available networks:");
+  Serial.println(numSsid);
+
+  // print the network number and name for each network found:
+  for (int thisNet = 0; thisNet < numSsid; thisNet++) {
+    Serial.print(thisNet);
+    Serial.print(") ");
+    Serial.print(WiFi.SSID(thisNet));
+    Serial.print("\tSignal: ");
+    Serial.print(WiFi.RSSI(thisNet));
+    Serial.print(" dBm");
+    Serial.print("\tEncryption: ");
+    printEncryptionType(WiFi.encryptionType(thisNet));
+  }
+}
+
+void printEncryptionType(int thisType) {
+  // read the encryption type and print out the name:
+  switch (thisType) {
+    case ENC_TYPE_WEP:
+      Serial.println("WEP");
+      break;
+    case ENC_TYPE_TKIP:
+      Serial.println("WPA");
+      break;
+    case ENC_TYPE_CCMP:
+      Serial.println("WPA2");
+      break;
+    case ENC_TYPE_NONE:
+      Serial.println("None");
+      break;
+    case ENC_TYPE_AUTO:
+      Serial.println("Auto");
+      break;
+  }
 }
