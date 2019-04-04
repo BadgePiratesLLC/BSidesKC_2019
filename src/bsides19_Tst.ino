@@ -44,13 +44,13 @@ void setup() {
   randomSeed(analogRead(0));
   goneTime = millis();
 
-if (WifiFlag == 1) {
-  WiFi.mode(WIFI_OFF);
-  WiFi.forceSleepBegin();
-  Serial.print("Wifi Disabled \"");
-}
+  if (WifiFlag == 1) {
+    WiFi.mode(WIFI_OFF);
+    WiFi.forceSleepBegin();
+    Serial.print("Wifi Disabled \"");
+  }
 
-if (WifiFlag ==0){
+  if (WifiFlag ==0){
     //WiFi.softAP(ssid, password);             // Start the access point
     Serial.print("Access Point \"");
     Serial.print(ssid);
