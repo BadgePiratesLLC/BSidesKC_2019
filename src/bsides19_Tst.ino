@@ -165,11 +165,12 @@ void listNetworks() {
     while (true);
   }
 
+  String badgePirateSSID = "badgepirates";
   // iterate over each ssid, then iterate over each led to check if we should
   for (int thisNet = 0; thisNet < numSsid; thisNet++) {
+    String thisSSID = WiFi.SSID(thisNet);
     for(int ssidIndex = 0; ssidIndex <= 5; ssidIndex++){
-      String thisSSID = "badgepirates";
-      if(WiFi.SSID(thisNet) == thisSSID + ssidIndex){
+      if( thisSSID == badgePirateSSID + ssidIndex){
         gameEnabled = 1;
         WifiFlags[ssidIndex] = 1;
         Serial.print("found batman and robin" + ssidIndex);
