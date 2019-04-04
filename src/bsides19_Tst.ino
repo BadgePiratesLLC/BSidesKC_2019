@@ -7,6 +7,7 @@ const char *ssid = "BadgePiratesAP_01"; // The name of the Wi-Fi network that wi
 const char *password = "thereisnospoon";   // The password required to connect to it, leave blank for an open network
 const int dTime = 50;
 const int WifiFlag = 0;
+int gameEnabled = 0;
 int WifiFlag1 = 0;
 int WifiFlag2 = 0;
 int WifiFlag3 = 0;
@@ -45,8 +46,117 @@ if (WifiFlag ==0){
 void loop()
 {
 
-  if(WifiFlag1 == 1){
+  if(gameEnabled == 1) {
+
+    if(WifiFlag1 == 1){
       //turn on LED L1
+      pinMode(LED_1, INPUT);      //row 1
+      digitalWrite(LED_1, LOW);
+      pinMode(LED_2, OUTPUT);     //row 2
+      digitalWrite(LED_2, LOW);
+      pinMode(LED_3, OUTPUT);     //row 3
+      digitalWrite(LED_3, HIGH);
+    }
+  }
+  else {
+    //turn on LED L1
+    pinMode(LED_1, INPUT);      //row 1
+    digitalWrite(LED_1, LOW);
+    pinMode(LED_2, OUTPUT);     //row 2
+    digitalWrite(LED_2, LOW);
+    pinMode(LED_3, OUTPUT);     //row 3
+    digitalWrite(LED_3, HIGH);
+    delay(dTime);
+
+      //turn on LED L2
+    pinMode(LED_1, OUTPUT);     //row 1
+    digitalWrite(LED_1, LOW);
+    pinMode(LED_2, OUTPUT);     //row 2
+    digitalWrite(LED_2, HIGH);
+    pinMode(LED_3, INPUT);      //row 3
+    digitalWrite(LED_3, LOW);
+
+    delay(dTime);
+
+    //turn on LED L3
+    pinMode(LED_1, INPUT);     //row 1
+    digitalWrite(LED_1, LOW);
+    pinMode(LED_2, OUTPUT);    //row 2
+    digitalWrite(LED_2, HIGH);
+    pinMode(LED_3, OUTPUT);    //row 3
+    digitalWrite(LED_3, LOW);
+
+    delay(dTime);
+
+     //turn on LED L4
+    pinMode(LED_1, OUTPUT);     //row 1
+    digitalWrite(LED_1, HIGH);
+    pinMode(LED_2, OUTPUT);     //row 2
+    digitalWrite(LED_2, LOW);
+    pinMode(LED_3, INPUT);      //row 3
+    digitalWrite(LED_3, LOW);
+
+    delay(dTime);
+
+    //turn on LED L5
+    pinMode(LED_1, OUTPUT);    //row 1
+    digitalWrite(LED_1, LOW);
+    pinMode(LED_2, INPUT);     //row 2
+    digitalWrite(LED_2, LOW);
+    pinMode(LED_3, OUTPUT);    //row3
+    digitalWrite(LED_3, HIGH);
+
+    delay(dTime);
+
+    //turn on LED L6
+    pinMode(LED_1, OUTPUT);
+    digitalWrite(LED_1, HIGH);
+    pinMode(LED_2, INPUT);
+    digitalWrite(LED_2, LOW);
+    pinMode(LED_3, OUTPUT);
+    digitalWrite(LED_3, LOW);
+
+    delay(dTime);
+
+      //turn on LED L5
+    pinMode(LED_1, OUTPUT);    //row 1
+    digitalWrite(LED_1, LOW);
+    pinMode(LED_2, INPUT);     //row 2
+    digitalWrite(LED_2, LOW);
+    pinMode(LED_3, OUTPUT);    //row3
+    digitalWrite(LED_3, HIGH);
+
+    delay(dTime);
+
+       //turn on LED L4
+    pinMode(LED_1, OUTPUT);     //row 1
+    digitalWrite(LED_1, HIGH);
+    pinMode(LED_2, OUTPUT);     //row 2
+    digitalWrite(LED_2, LOW);
+    pinMode(LED_3, INPUT);      //row 3
+    digitalWrite(LED_3, LOW);
+
+    delay(dTime);
+      //turn on LED L3
+    pinMode(LED_1, INPUT);     //row 1
+    digitalWrite(LED_1, LOW);
+    pinMode(LED_2, OUTPUT);    //row 2
+    digitalWrite(LED_2, HIGH);
+    pinMode(LED_3, OUTPUT);    //row 3
+    digitalWrite(LED_3, LOW);
+
+    delay(dTime);
+
+        //turn on LED L2
+    pinMode(LED_1, OUTPUT);     //row 1
+    digitalWrite(LED_1, LOW);
+    pinMode(LED_2, OUTPUT);     //row 2
+    digitalWrite(LED_2, HIGH);
+    pinMode(LED_3, INPUT);      //row 3
+    digitalWrite(LED_3, LOW);
+
+    delay(dTime);
+        //turn on LED L1
     pinMode(LED_1, INPUT);      //row 1
     digitalWrite(LED_1, LOW);
     pinMode(LED_2, OUTPUT);     //row 2
@@ -54,104 +164,6 @@ void loop()
     pinMode(LED_3, OUTPUT);     //row 3
     digitalWrite(LED_3, HIGH);
   }
-
-  // delay(dTime);
-
-  //   //turn on LED L2
-  // pinMode(LED_1, OUTPUT);     //row 1
-  // digitalWrite(LED_1, LOW);
-  // pinMode(LED_2, OUTPUT);     //row 2
-  // digitalWrite(LED_2, HIGH);
-  // pinMode(LED_3, INPUT);      //row 3
-  // digitalWrite(LED_3, LOW);
-  //
-  // delay(dTime);
-  //
-  // //turn on LED L3
-  // pinMode(LED_1, INPUT);     //row 1
-  // digitalWrite(LED_1, LOW);
-  // pinMode(LED_2, OUTPUT);    //row 2
-  // digitalWrite(LED_2, HIGH);
-  // pinMode(LED_3, OUTPUT);    //row 3
-  // digitalWrite(LED_3, LOW);
-  //
-  // delay(dTime);
-  //
-  //  //turn on LED L4
-  // pinMode(LED_1, OUTPUT);     //row 1
-  // digitalWrite(LED_1, HIGH);
-  // pinMode(LED_2, OUTPUT);     //row 2
-  // digitalWrite(LED_2, LOW);
-  // pinMode(LED_3, INPUT);      //row 3
-  // digitalWrite(LED_3, LOW);
-  //
-  // delay(dTime);
-  //
-  // //turn on LED L5
-  // pinMode(LED_1, OUTPUT);    //row 1
-  // digitalWrite(LED_1, LOW);
-  // pinMode(LED_2, INPUT);     //row 2
-  // digitalWrite(LED_2, LOW);
-  // pinMode(LED_3, OUTPUT);    //row3
-  // digitalWrite(LED_3, HIGH);
-  //
-  // delay(dTime);
-  //
-  // //turn on LED L6
-  // pinMode(LED_1, OUTPUT);
-  // digitalWrite(LED_1, HIGH);
-  // pinMode(LED_2, INPUT);
-  // digitalWrite(LED_2, LOW);
-  // pinMode(LED_3, OUTPUT);
-  // digitalWrite(LED_3, LOW);
-  //
-  // delay(dTime);
-  //
-  //   //turn on LED L5
-  // pinMode(LED_1, OUTPUT);    //row 1
-  // digitalWrite(LED_1, LOW);
-  // pinMode(LED_2, INPUT);     //row 2
-  // digitalWrite(LED_2, LOW);
-  // pinMode(LED_3, OUTPUT);    //row3
-  // digitalWrite(LED_3, HIGH);
-  //
-  // delay(dTime);
-  //
-  //    //turn on LED L4
-  // pinMode(LED_1, OUTPUT);     //row 1
-  // digitalWrite(LED_1, HIGH);
-  // pinMode(LED_2, OUTPUT);     //row 2
-  // digitalWrite(LED_2, LOW);
-  // pinMode(LED_3, INPUT);      //row 3
-  // digitalWrite(LED_3, LOW);
-  //
-  // delay(dTime);
-  //   //turn on LED L3
-  // pinMode(LED_1, INPUT);     //row 1
-  // digitalWrite(LED_1, LOW);
-  // pinMode(LED_2, OUTPUT);    //row 2
-  // digitalWrite(LED_2, HIGH);
-  // pinMode(LED_3, OUTPUT);    //row 3
-  // digitalWrite(LED_3, LOW);
-  //
-  // delay(dTime);
-  //
-  //     //turn on LED L2
-  // pinMode(LED_1, OUTPUT);     //row 1
-  // digitalWrite(LED_1, LOW);
-  // pinMode(LED_2, OUTPUT);     //row 2
-  // digitalWrite(LED_2, HIGH);
-  // pinMode(LED_3, INPUT);      //row 3
-  // digitalWrite(LED_3, LOW);
-  //
-  // delay(dTime);
-  //     //turn on LED L1
-  // pinMode(LED_1, INPUT);      //row 1
-  // digitalWrite(LED_1, LOW);
-  // pinMode(LED_2, OUTPUT);     //row 2
-  // digitalWrite(LED_2, LOW);
-  // pinMode(LED_3, OUTPUT);     //row 3
-  // digitalWrite(LED_3, HIGH);
 
 }
 void listNetworks() {
@@ -171,6 +183,7 @@ void listNetworks() {
   for (int thisNet = 0; thisNet < numSsid; thisNet++) {
     Serial.print(thisNet);
     if(WiFi.SSID(thisNet) == "batman and robin"){
+      gameEnabled = 1;
       Serial.print("found batman and robin!");
       WifiFlag1 = 1;
     }
