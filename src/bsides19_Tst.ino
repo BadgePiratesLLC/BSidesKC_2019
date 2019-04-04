@@ -24,6 +24,9 @@ const int dTime = 50;
 const int WifiFlag = 0;
 int gameEnabled = 0;
 int WifiFlags[] = {0,0,0,0,0,0};
+int completedArray[] = {1,1,1,1,1,1};
+
+bool gameCompleted = false;
 
 long goneTime;
 #define NEWPATTERN 100        //100 ms for new LED pattern
@@ -78,7 +81,9 @@ void loop()
   {
      Serial.print("Scanning:\t ");
      lastSampleTime += fiveMinutes;
-     listNetworks();
+     if(!gameCompleted){
+       listNetworks();
+     }
   }
 
   // add code to do other stuff here
@@ -96,40 +101,50 @@ void loop()
 
   if(gameEnabled == 1) {
 
-    if(WifiFlags[0] == 1){
-      myCharlie.ledWrite(myLeds[0], ON);
-    } else {
-      myCharlie.ledWrite(myLeds[0], OFF);
+    if(gameCompleted){
+      //flicker pattern
+      if (millis()-goneTime >= NEWPATTERN) {
+        for (byte i=0; i<10; i++)
+          myCharlie.ledWrite(myLeds[i], (byte)random(0,2));
+        goneTime = millis();
+      }
     }
+    else{
+      if(WifiFlags[0] == 1){
+        myCharlie.ledWrite(myLeds[0], ON);
+      } else {
+        myCharlie.ledWrite(myLeds[0], OFF);
+      }
 
-    if(WifiFlags[1] == 1){
-      myCharlie.ledWrite(myLeds[1], ON);
-    } else {
-      myCharlie.ledWrite(myLeds[1], OFF);
-    }
+      if(WifiFlags[1] == 1){
+        myCharlie.ledWrite(myLeds[1], ON);
+      } else {
+        myCharlie.ledWrite(myLeds[1], OFF);
+      }
 
-    if(WifiFlags[2] == 1){
-      myCharlie.ledWrite(myLeds[2], ON);
-    } else {
-      myCharlie.ledWrite(myLeds[2], OFF);
-    }
+      if(WifiFlags[2] == 1){
+        myCharlie.ledWrite(myLeds[2], ON);
+      } else {
+        myCharlie.ledWrite(myLeds[2], OFF);
+      }
 
-    if(WifiFlags[3] == 1){
-      myCharlie.ledWrite(myLeds[3], ON);
-    } else {
-      myCharlie.ledWrite(myLeds[3], OFF);
-    }
+      if(WifiFlags[3] == 1){
+        myCharlie.ledWrite(myLeds[3], ON);
+      } else {
+        myCharlie.ledWrite(myLeds[3], OFF);
+      }
 
-    if(WifiFlags[4] == 1){
-      myCharlie.ledWrite(myLeds[4], ON);
-    } else {
-      myCharlie.ledWrite(myLeds[4], OFF);
-    }
+      if(WifiFlags[4] == 1){
+        myCharlie.ledWrite(myLeds[4], ON);
+      } else {
+        myCharlie.ledWrite(myLeds[4], OFF);
+      }
 
-    if(WifiFlags[5] == 1){
-      myCharlie.ledWrite(myLeds[5], ON);
-    } else {
-      myCharlie.ledWrite(myLeds[5], OFF);
+      if(WifiFlags[5] == 1){
+        myCharlie.ledWrite(myLeds[5], ON);
+      } else {
+        myCharlie.ledWrite(myLeds[5], OFF);
+      }
     }
   }
   else {
@@ -177,4 +192,16 @@ void listNetworks() {
       }
     }
   }
+
+  gameCompleted = checkArrays(WifiFlags, completedArray, 6);
+}
+
+boolean checkArrays(int arrayA[],int arrayB[], long numItems) {
+  boolean same = true;
+  long i = 0;
+  while(i<numItems && same) {
+    same = arrayA[i] == arrayB[i];
+    i++;
+  }
+  return same;
 }
