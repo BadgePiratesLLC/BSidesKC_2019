@@ -8,12 +8,7 @@ const char *password = "thereisnospoon";   // The password required to connect t
 const int dTime = 50;
 const int WifiFlag = 0;
 int gameEnabled = 0;
-int WifiFlag1 = 0;
-int WifiFlag2 = 0;
-int WifiFlag3 = 0;
-int WifiFlag4 = 0;
-int WifiFlag5 = 0;
-int WifiFlag6 = 0;
+int WifiFlags[] = {0,0,0,0,0,0};
 
 void setup() {
   Serial.begin(74880);
@@ -48,7 +43,7 @@ void loop()
 
   if(gameEnabled == 1) {
 
-    if(WifiFlag1 == 1){
+    if(WifiFlags[0] == 1){
       //turn on LED L1
       pinMode(LED_1, INPUT);      //row 1
       digitalWrite(LED_1, LOW);
@@ -56,6 +51,52 @@ void loop()
       digitalWrite(LED_2, LOW);
       pinMode(LED_3, OUTPUT);     //row 3
       digitalWrite(LED_3, HIGH);
+    }
+
+    if(WifiFlags[1] == 1){
+      //turn on LED L2
+      pinMode(LED_1, OUTPUT);     //row 1
+      digitalWrite(LED_1, LOW);
+      pinMode(LED_2, OUTPUT);     //row 2
+      digitalWrite(LED_2, HIGH);
+      pinMode(LED_3, INPUT);      //row 3
+      digitalWrite(LED_3, LOW);
+    }
+    if(WifiFlags[2] == 1){
+      //turn on LED L3
+      pinMode(LED_1, INPUT);     //row 1
+      digitalWrite(LED_1, LOW);
+      pinMode(LED_2, OUTPUT);    //row 2
+      digitalWrite(LED_2, HIGH);
+      pinMode(LED_3, OUTPUT);    //row 3
+      digitalWrite(LED_3, LOW);
+    }
+    if(WifiFlags[3] == 1){
+       //turn on LED L4
+      pinMode(LED_1, OUTPUT);     //row 1
+      digitalWrite(LED_1, HIGH);
+      pinMode(LED_2, OUTPUT);     //row 2
+      digitalWrite(LED_2, LOW);
+      pinMode(LED_3, INPUT);      //row 3
+      digitalWrite(LED_3, LOW);
+    }
+    if(WifiFlags[4] == 1){
+      //turn on LED L5
+      pinMode(LED_1, OUTPUT);    //row 1
+      digitalWrite(LED_1, LOW);
+      pinMode(LED_2, INPUT);     //row 2
+      digitalWrite(LED_2, LOW);
+      pinMode(LED_3, OUTPUT);    //row3
+      digitalWrite(LED_3, HIGH);
+    }
+    if(WifiFlags[5] == 1){
+      //turn on LED L6
+      pinMode(LED_1, OUTPUT);
+      digitalWrite(LED_1, HIGH);
+      pinMode(LED_2, INPUT);
+      digitalWrite(LED_2, LOW);
+      pinMode(LED_3, OUTPUT);
+      digitalWrite(LED_3, LOW);
     }
   }
   else {
@@ -166,6 +207,7 @@ void loop()
   }
 
 }
+
 void listNetworks() {
   // scan for nearby networks:
   Serial.println("** Scan Networks **");
@@ -175,12 +217,15 @@ void listNetworks() {
     while (true);
   }
 
-  // print the network number and name for each network found:
+  // iterate over each ssid, then iterate over each led to check if we should
   for (int thisNet = 0; thisNet < numSsid; thisNet++) {
-    if(WiFi.SSID(thisNet) == "batman and robin"){
-      gameEnabled = 1;
-      Serial.print("found batman and robin!");
-      WifiFlag1 = 1;
+    for(int ssidIndex = 0; ssidIndex <= 5; ssidIndex++){
+      String thisSSID = "badgepirates";
+      if(WiFi.SSID(thisNet) == thisSSID + ssidIndex){
+        gameEnabled = 1;
+        WifiFlags[ssidIndex] = 1;
+        Serial.print("found batman and robin" + ssidIndex);
+      }
     }
   }
 }
