@@ -102,7 +102,7 @@ void setup() {
         Serial.print("restoring flag ");
         Serial.println(index);
         WifiFlags[index] = 1;
-        gameEnabled == 1;
+        gameEnabled = 1;
       }
     }
   }
