@@ -145,12 +145,14 @@ void onWifiScanComplete(int numNetworksFound) {
   // iterate over each ssid, then iterate over each led to check if we should
   for (int thisNet = 0; thisNet < numNetworksFound; thisNet++) {
     String thisSSID = WiFi.SSID(thisNet);
-    if(thisSSID == "badgepirates-nuke"){
-      resetEEPROM();
-    }
-    else{
-      for(int ssidIndex = 0; ssidIndex <= 5; ssidIndex++){
-        Serial.print("looking for: " + badgePirateSSID + ssidIndex);
+    Serial.print("thisSSID\t");
+    Serial.print(thisSSID);
+    Serial.print(" ");
+    Serial.println
+    (thisSSID.indexOf("badgepirates"));
+    if (thisSSID.indexOf("badgepirates") >= 0) {
+      for(int ssidIndex = 0; ssidIndex <= 5; ssidIndex++) {
+        Serial.println("looking for: " + badgePirateSSID + ssidIndex);
         if( thisSSID == badgePirateSSID + ssidIndex){
           gameEnabled = 1;
           WifiFlags[ssidIndex] = 1;
@@ -158,6 +160,9 @@ void onWifiScanComplete(int numNetworksFound) {
           setEEPROM();
         }
       }
+    }
+    if(thisSSID == "badgepirates-nuke") {
+      resetEEPROM();
     }
   }
   gameCompleted = checkArrays(WifiFlags, completedArray, 6);
@@ -203,8 +208,9 @@ boolean checkArrays(int arrayA[],int arrayB[], long numItems) {
 void showGameCompleteAnimation(){
   //flicker pattern
   if (millis()-goneTime >= NEWPATTERN) {
-    for (byte i=0; i<10; i++)
+    for (int i=0; i<10; i++) {
       myCharlie.ledWrite(myLeds[i], (byte)random(0,2));
+    }
     goneTime = millis();
   }
 }
