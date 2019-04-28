@@ -1,28 +1,36 @@
 
-#include <ESP8266WiFi.h>        // Include the Wi-Fi library#include <EEPROM.h>
+#include <ESP8266WiFi.h>
 #include <EEPROM.h>
 #include "Chaplex.h"
-const int LED_1 = 13;     //LED row 1
-const int LED_2 = 12;     //LED row 2
-const int LED_3 = 10;     //LED row 3
 
-//chaplex stuff
-byte controlPins[] = {13, 12, 10};
+//THE PARTICIPANT BADGES HAVE DIFFERENT MODEL ESP8266. PLEASE READ THIS SECTION CAREFULLY IF YOU ARE USING
+//A NON-PARTICIPANT BADGE
+
+//setup chaplex
+byte controlPins[] = {13, 10, 12}; //{13, 12, 10} if you do not have a participant badge
 #define numControlPins sizeof(controlPins) / sizeof(*controlPins)
 Chaplex myCharlie(controlPins, numControlPins); //control instance
-charlieLed myLeds[6] = {
+charlieLed scoreLeds[6] = {
   { 2 , 1 },    // 1 controlled leds in sorted order (when looking at front, from left -> to -> right)
-  { 1 , 0 },    // 2 every element is one led with
+  { 0 , 2 },    // 2 every element is one led with
   { 1 , 2 },    // 3 {anode-pin,cathode-pin}
-  { 0 , 1 },    // 4 "pin" means here - index in controlPins
-  { 2 , 0 },    // 5 array defined above
-  { 0 , 2 }     // 6
+  { 2 , 0 },    // 4 "pin" means here - index in controlPins
+  { 0 , 1 },    // 5 array defined above
+  { 1 , 0 }     // 6
 };
 
-const char *ssid = "BadgePiratesAP_01"; // The name of the Wi-Fi network that will be created
-const char *password = "thereisnospoon";   // The password required to connect to it, leave blank for an open network
+//IF YOU DO NOT HAVE A WHITE PARTICIPANT BADGE, UN-COMMENT THE scoreLeds DECLARATION BELOW AND COMMENT OUT THE ONE ABOVE
+
+// charlieLed scoreLeds[6] = {
+//   { 2 , 1 },    // 1 controlled leds in sorted order (when looking at front, from left -> to -> right)
+//   { 1 , 0 },    // 2 every element is one led with
+//   { 1 , 2 },    // 3 {anode-pin,cathode-pin}
+//   { 0 , 1 },    // 4 "pin" means here - index in controlPins
+//   { 2 , 0 },    // 5 array defined above
+//   { 0 , 2 }     // 6
+// };
+
 const int dTime = 50;
-const int WifiFlag = 0;
 int gameEnabled = 0;
 int WifiFlags[] = {0,0,0,0,0,0};
 int completedArray[] = {1,1,1,1,1,1};
@@ -49,9 +57,8 @@ bool gameCompleted = false;
 bool scanning = false;
 
 long goneTime;
-#define NEWPATTERN 100        //100 ms for new LED pattern
+#define NEWPATTERN 100 //100 ms for new LED pattern
 os_timer_t myTimer;
-bool tickOccured;
 bool reverseAnimation = false;
 
 void timerCallback(void *pArg) {
@@ -60,111 +67,93 @@ void timerCallback(void *pArg) {
 
 void setup() {
   Serial.begin(9600);
-  Serial.println();
   EEPROM.begin(512);
   os_timer_setfn(&myTimer, timerCallback, NULL);
   os_timer_arm(&myTimer, 5, true);
   randomSeed(analogRead(0));
   goneTime = millis();
 
-  if (WifiFlag == 1) {
-    WiFi.mode(WIFI_OFF);
-    WiFi.forceSleepBegin();
-    Serial.print("Wifi Disabled \"");
-    EEPROM.write(0, 0);
-    EEPROM.commit();
-    Serial.print("Reset EEPROM FLAGS");
-  }
+  //get current EEPROM value
+  eepromFlags = EEPROM.read(0);
 
-  if (WifiFlag ==0){
-    //WiFi.softAP(ssid, password);             // Start the access point
-    Serial.print("Access Point \"");
-    Serial.print(ssid);
-    Serial.println("\" setup but not started");
-
-    Serial.print("IP address:\t");
-    Serial.println(WiFi.softAPIP());         // Send the IP address of the ESP8266 to the Monitor
-
-    Serial.print("MAC:\t ");
-    Serial.println(WiFi.macAddress());  // Send the MAC address of the ESP8266 to the Monitor
-    Serial.println('\n');
-
-    eepromFlags = EEPROM.read(0);
-    Serial.print("EEPROM WifiFlag:\t");
-    Serial.println(eepromFlags, DEC);
-
-    //restore WifiFlags based on eeprom
-    for(int index = 0; index <= 5; ++index) {
-      int WifiFlagValue = WifiFlagArray[index];
-      Serial.print("Testing if eeprom contains flag ");
-      Serial.println(WifiFlagValue);
-      if ((eepromFlags & WifiFlagValue) != 0) {
-        Serial.print("restoring flag ");
-        Serial.println(index);
-        WifiFlags[index] = 1;
-        gameEnabled = 1;
-      }
+  //restore WifiFlags based on eeprom
+  for(int index = 0; index <= 5; ++index) {
+    int WifiFlagValue = WifiFlagArray[index];
+    //Testing if eeprom contains flag
+    if ((eepromFlags & WifiFlagValue) != 0) {
+      //restore saved flag
+      WifiFlags[index] = 1;
+      gameEnabled = 1;
     }
   }
 }
 
-
 void loop() {
-  // const unsigned long fiveMinutes = 5 * 60 * 1000UL;
-  const unsigned long fiveMinutes = 15 * 1000UL;  // 15 seconds to test, uncomment above code for 5 minutes
+  unsigned long now = millis(); //get current 'time'
+  const unsigned long fiveMinutes = 15 * 1000UL;  // scan every 15 seconds
   static unsigned long lastSampleTime = 0 - fiveMinutes;  // initialize such that a reading is due the first time through loop()
-  unsigned long now = millis();
   if (now - lastSampleTime >= fiveMinutes) {
-    Serial.print("Scanning:\t ");
     lastSampleTime += fiveMinutes;
     if(!gameCompleted){
+     //if the game is not complete, time to scan...
      listNetworks();
     }
   }
 
   if(gameCompleted){
+    //game is completed, show the winning animation
     showGameCompleteAnimation();
   }
   else if(scanning){
+    //show scan animation is scanning is set to true
     scanAnimation();
   }
   else{
+    //otherwise, show the game score
     showGameScore();
   }
 }
 
 void listNetworks() {
   // scan for nearby networks:
-  Serial.println("** Scan Networks **");
   scanning = true;
+  //this allows the esp to scan while not blocking the scan animation
+  //when scanning is complete, it calls the function 'onWifiScanCOmplete'
   WiFi.scanNetworksAsync(onWifiScanComplete, true);
 }
 
 void onWifiScanComplete(int numNetworksFound) {
+  //scan complete
   String badgePirateSSID = "badgepirates";
   // iterate over each ssid, then iterate over each led to check if we should
   for (int thisNet = 0; thisNet < numNetworksFound; thisNet++) {
-    String thisSSID = WiFi.SSID(thisNet);
-    Serial.print("thisSSID\t");
-    Serial.print(thisSSID);
-    Serial.print(" ");
-    Serial.println
-    (thisSSID.indexOf("badgepirates"));
+    String thisSSID = WiFi.SSID(thisNet); //convert the ssid to a string that we can compare on
+
+    //in testing, we would get a buffer overflow if we iterated over too many access points
+    //to prevent this, we only iterate over the SSID if the string starts with 'badgepirates'
+    // the result of .indexOf(...) in this case should be 0 since it's at the start of the string
     if (thisSSID.indexOf("badgepirates") >= 0) {
-      for(int ssidIndex = 0; ssidIndex <= 5; ssidIndex++) {
-        Serial.println("looking for: " + badgePirateSSID + ssidIndex);
+      for(int ssidIndex = 0; ssidIndex <= 5; ssidIndex++) { //iterate over each of the 6 potential access points
         if( thisSSID == badgePirateSSID + ssidIndex){
-          gameEnabled = 1;
-          WifiFlags[ssidIndex] = 1;
-          flagsFound |= WifiFlagArray[ssidIndex];
+          gameEnabled = 1; //this keeps the badge scan animation going until the badge finds its first flag
+          WifiFlags[ssidIndex] = 1; //set the found flag to light up
+          flagsFound |= WifiFlagArray[ssidIndex]; //update the flag array
           setEEPROM();
         }
       }
     }
+
+    //setup a hotspot or AP with the SSID "badgepirates-nuke".  If a badge scans this SSID
+    //it will reset the EEPROM, flag values, and lights as if it were a new badge.
     if(thisSSID == "badgepirates-nuke") {
+      for(int i = 0; i <= 5; i++) {
+        WifiFlags[i] = 0;
+      }
       resetEEPROM();
     }
   }
+
+  //check and set gameComplated to true if badge has found all flags
   gameCompleted = checkArrays(WifiFlags, completedArray, 6);
 
   //keep the scanning animation if the user has not found any flags yet
@@ -176,25 +165,18 @@ void onWifiScanComplete(int numNetworksFound) {
 void setEEPROM() {
   int allFlagsFound = eepromFlags | flagsFound;
   if (allFlagsFound > eepromFlags) {
-    Serial.print("new flags found:\t");
-    Serial.println(flagsFound, DEC);
-    Serial.print("Updating EEPROM with new flag value:\t");
-    Serial.println(allFlagsFound);
     EEPROM.write(0, allFlagsFound);
     EEPROM.commit();
-    eepromFlags = EEPROM.read(0);
-    Serial.print("EEPROM WifiFlag:\t");
-    Serial.print(eepromFlags, DEC);
-    Serial.println('\n');
   }
 }
 
 void resetEEPROM() {
+  //drop the nuke
   EEPROM.write(0, 0);
   EEPROM.commit();
-  Serial.print("Reset EEPROM FLAGS");
 }
 
+//compares two arrays and returns true/false
 boolean checkArrays(int arrayA[],int arrayB[], long numItems) {
   boolean same = true;
   long i = 0;
@@ -205,11 +187,17 @@ boolean checkArrays(int arrayA[],int arrayB[], long numItems) {
   return same;
 }
 
+/////////////////////////////////////////////////
+////////////////                /////////////////
+//////////////// animation code /////////////////
+////////////////                /////////////////
+/////////////////////////////////////////////////
+
 void showGameCompleteAnimation(){
   //flicker pattern
   if (millis()-goneTime >= NEWPATTERN) {
     for (int i=0; i<10; i++) {
-      myCharlie.ledWrite(myLeds[i], (byte)random(0,2));
+      myCharlie.ledWrite(scoreLeds[i], (byte)random(0,2));
     }
     goneTime = millis();
   }
@@ -218,39 +206,39 @@ void showGameCompleteAnimation(){
 void showGameScore() {
 
     if(WifiFlags[0] == 1){
-      myCharlie.ledWrite(myLeds[0], ON);
+      myCharlie.ledWrite(scoreLeds[0], ON);
     } else {
-      myCharlie.ledWrite(myLeds[0], OFF);
+      myCharlie.ledWrite(scoreLeds[0], OFF);
     }
 
     if(WifiFlags[1] == 1){
-      myCharlie.ledWrite(myLeds[1], ON);
+      myCharlie.ledWrite(scoreLeds[1], ON);
     } else {
-      myCharlie.ledWrite(myLeds[1], OFF);
+      myCharlie.ledWrite(scoreLeds[1], OFF);
     }
 
     if(WifiFlags[2] == 1){
-      myCharlie.ledWrite(myLeds[2], ON);
+      myCharlie.ledWrite(scoreLeds[2], ON);
     } else {
-      myCharlie.ledWrite(myLeds[2], OFF);
+      myCharlie.ledWrite(scoreLeds[2], OFF);
     }
 
     if(WifiFlags[3] == 1){
-      myCharlie.ledWrite(myLeds[3], ON);
+      myCharlie.ledWrite(scoreLeds[3], ON);
     } else {
-      myCharlie.ledWrite(myLeds[3], OFF);
+      myCharlie.ledWrite(scoreLeds[3], OFF);
     }
 
     if(WifiFlags[4] == 1){
-      myCharlie.ledWrite(myLeds[4], ON);
+      myCharlie.ledWrite(scoreLeds[4], ON);
     } else {
-      myCharlie.ledWrite(myLeds[4], OFF);
+      myCharlie.ledWrite(scoreLeds[4], OFF);
     }
 
     if(WifiFlags[5] == 1){
-      myCharlie.ledWrite(myLeds[5], ON);
+      myCharlie.ledWrite(scoreLeds[5], ON);
     } else {
-      myCharlie.ledWrite(myLeds[5], OFF);
+      myCharlie.ledWrite(scoreLeds[5], OFF);
     }
 }
 
@@ -258,8 +246,8 @@ void scanAnimation(){
   if(!reverseAnimation) {
     for (int i=0; i < 6; i++) {
       for(int x=0; x < 6; x++){
-        if(x == i) { myCharlie.ledWrite(myLeds[x], ON); }
-        else {myCharlie.ledWrite(myLeds[x], OFF);}
+        if(x == i) { myCharlie.ledWrite(scoreLeds[x], ON); }
+        else {myCharlie.ledWrite(scoreLeds[x], OFF);}
       }
       delay(dTime);
     }
@@ -268,8 +256,8 @@ void scanAnimation(){
   else {
     for (int i=5; i > 0; i--) {
       for(int x=5; x > 0; x--){
-        if(x == i) { myCharlie.ledWrite(myLeds[x], ON); }
-        else {myCharlie.ledWrite(myLeds[x], OFF);}
+        if(x == i) { myCharlie.ledWrite(scoreLeds[x], ON); }
+        else {myCharlie.ledWrite(scoreLeds[x], OFF);}
       }
       delay(dTime);
     }
