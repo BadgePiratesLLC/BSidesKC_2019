@@ -6,8 +6,14 @@
 //THE PARTICIPANT BADGES HAVE DIFFERENT MODEL ESP8266. PLEASE READ THIS SECTION CAREFULLY IF YOU ARE USING
 //A NON-PARTICIPANT BADGE
 
+//The leds use a method called 'Charlieplexing' for control
+//this allows us to control 6 leds with only 3 pin outs
+//we use a library called 'Chaplex' to help with some of the complexity
+//for more information on the fascinating world of charlieplexing,
+//checkout the wikipedia: https://en.wikipedia.org/wiki/Charlieplexing
+
 //setup chaplex
-byte controlPins[] = {13, 10, 12}; //{13, 12, 10} if you do not have a participant badge
+byte controlPins[] = {13, 10, 12}; //{13, 12, 10} <--- use this if you do not have a participant badge
 #define numControlPins sizeof(controlPins) / sizeof(*controlPins)
 Chaplex myCharlie(controlPins, numControlPins); //control instance
 charlieLed scoreLeds[6] = {
